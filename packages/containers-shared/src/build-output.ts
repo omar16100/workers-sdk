@@ -227,14 +227,18 @@ async function cleanupPreviousBuildOutputImageTags(options: {
 	const repositoryPrefix = getBuildOutputImageRepositoryPrefix(options.root);
 	let existingTags: string[];
 	try {
-		const output = runDockerCmdWithOutput(options.pathToDocker, [
-			"image",
-			"ls",
-			"--filter",
-			`reference=${repositoryPrefix}*`,
-			"--format",
-			"{{.Repository}}:{{.Tag}}",
-		]);
+		const output = runDockerCmdWithOutput(
+			options.pathToDocker,
+			[
+				"image",
+				"ls",
+				"--filter",
+				`reference=${repositoryPrefix}*`,
+				"--format",
+				"{{.Repository}}:{{.Tag}}",
+			],
+			{ quiet: true }
+		);
 		existingTags = output === "" ? [] : output.split(/\r?\n/);
 	} catch {
 		// Cleanup is best effort so registry-only builds do not require Docker.

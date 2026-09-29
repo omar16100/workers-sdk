@@ -84,9 +84,21 @@ export const runDockerCmd = (
 	};
 };
 
-export const runDockerCmdWithOutput = (dockerPath: string, args: string[]) => {
+/**
+ * Runs a Docker command and returns its trimmed stdout.
+ * Quiet mode captures stderr without forwarding it, but failures still throw.
+ */
+export const runDockerCmdWithOutput = (
+	dockerPath: string,
+	args: string[],
+	options: { quiet?: boolean } = {}
+) => {
 	try {
-		const stdout = execFileSync(dockerPath, args, { encoding: "utf8" });
+		const stdout = execFileSync(dockerPath, args, {
+			encoding: "utf8",
+			// execFileSync forwards stderr on failure unless stdio is explicit.
+			...(options.quiet ? { stdio: "pipe" as const } : {}),
+		});
 		return stdout.trim();
 	} catch (error) {
 		throw new UserError(

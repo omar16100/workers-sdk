@@ -469,6 +469,18 @@ describe("buildAndWriteContainerOutput", () => {
 			pathToDocker: "docker",
 		});
 
+		expect(runDockerCmdWithOutput).toHaveBeenCalledWith(
+			"docker",
+			[
+				"image",
+				"ls",
+				"--filter",
+				`reference=cloudflare-build/${shortHash(path.resolve(root))}/*`,
+				"--format",
+				"{{.Repository}}:{{.Tag}}",
+			],
+			{ quiet: true }
+		);
 		expect(verifyDockerInstalled).not.toHaveBeenCalled();
 		expect(cleanupBuiltImages).toHaveBeenCalledWith(
 			[{ localTag: staleTag }],
@@ -506,26 +518,35 @@ describe("buildAndWriteContainerOutput", () => {
 		);
 	});
 
-	it("does not require Docker to clean a registry-only build", async ({
-		expect,
-	}) => {
-		const config = InputContainerSchema.parse({
-			name: "remote-container",
-			image: { reference: "registry.example.com/app:latest" },
-		});
-		vi.mocked(runDockerCmdWithOutput).mockImplementation(() => {
-			throw new Error("Docker is unavailable");
-		});
+	it.for([
+		"Docker executable not found",
+		"Cannot connect to the Docker daemon",
+	])(
+		"does not require Docker to clean a registry-only build: %s",
+		async (message, { expect }) => {
+			const config = InputContainerSchema.parse({
+				name: "remote-container",
+				image: { reference: "registry.example.com/app:latest" },
+			});
+			vi.mocked(runDockerCmdWithOutput).mockImplementation(() => {
+				throw new Error(message);
+			});
 
-		await expect(
-			buildAndWriteContainerOutput({
-				containers: [config],
-				root,
-				pathToDocker: "docker",
-			})
-		).resolves.toBeUndefined();
-		expect(verifyDockerInstalled).not.toHaveBeenCalled();
-	});
+			await expect(
+				buildAndWriteContainerOutput({
+					containers: [config],
+					root,
+					pathToDocker: "docker",
+				})
+			).resolves.toBeUndefined();
+			expect(verifyDockerInstalled).not.toHaveBeenCalled();
+			expect(runDockerCmdWithOutput).toHaveBeenCalledWith(
+				"docker",
+				expect.any(Array),
+				{ quiet: true }
+			);
+		}
+	);
 });
 
 function expectedBuildOutputTag(
