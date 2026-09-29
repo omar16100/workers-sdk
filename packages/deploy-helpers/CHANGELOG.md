@@ -1,5 +1,37 @@
 # @cloudflare/deploy-helpers
 
+## 0.19.0
+
+### Minor Changes
+
+- [#15948](https://github.com/cloudflare/workers-sdk/pull/15948) [`a0712e5`](https://github.com/cloudflare/workers-sdk/commit/a0712e578e45908ed5e46235828a434b49cf8f22) Thanks [@akoval-cf](https://github.com/akoval-cf)! - Add beta K2 producer bindings for existing streams
+
+  Configure a stream created through Wrangler, the Dashboard, or the API in `wrangler.json`:
+
+  ```jsonc
+  {
+    "k2": [
+      {
+        "binding": "ORDERS",
+        "stream": "0123456789abcdef0123456789abcdef"
+      }
+    ]
+  }
+  ```
+
+  The binding supports `env.ORDERS.send([{ content: new TextEncoder().encode("order"), headers: { event: "order.created" } }])`. Batches use either all `ArrayBuffer` or all `Uint8Array` content. Check the returned `success` value, handle rejected RPC promises, and retry only when the returned error explicitly allows it. Generated environment types describe this producer contract without requiring a separate application dependency.
+
+  K2 requires an enabled account. Deployment credentials need Worker deployment and K2 configuration-read access. Default Wrangler logins now request the K2 OAuth scopes; existing OAuth users should run `wrangler login` again to grant the new permissions. Development always uses a real K2 stream and may incur usage charges; no local simulator is provided. The `remote` setting can be omitted, `remote: true` suppresses the usage warning, and `remote: false` is rejected. Consumption is not part of this Worker binding.
+
+### Patch Changes
+
+- Updated dependencies [[`a0712e5`](https://github.com/cloudflare/workers-sdk/commit/a0712e578e45908ed5e46235828a434b49cf8f22)]:
+  - miniflare@5.20260926.2-alpha
+  - @cloudflare/config@0.22.0
+  - @cloudflare/workers-utils@0.45.0
+  - @cloudflare/containers-shared@0.21.1
+  - @cloudflare/cli-shared-helpers@0.2.1
+
 ## 0.18.3
 
 ### Patch Changes

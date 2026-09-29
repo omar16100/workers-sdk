@@ -1,5 +1,13 @@
 # @cloudflare/codemods
 
+## 0.3.0
+
+### Minor Changes
+
+- [#15948](https://github.com/cloudflare/workers-sdk/pull/15948) [`a0712e5`](https://github.com/cloudflare/workers-sdk/commit/a0712e578e45908ed5e46235828a434b49cf8f22) Thanks [@akoval-cf](https://github.com/akoval-cf)! - Migrate beta K2 producer bindings in the `wrangler-to-cf` codemod
+
+  `k2` entries in a Wrangler configuration file are converted to `bindings.k2({ stream })`. A `remote` setting is carried over as `dev.remote`.
+
 ## 0.2.1
 
 ### Patch Changes
